@@ -9,9 +9,9 @@ int main()
   while (1)
   {
     //test the voltage on the initialized analog pin
-    //  and if greater than 0.3 * VCC set the digital pin
+    //  and if greater than 0.5 * VCC set the digital pin
     //  to a logic 1 otherwise a logic 0
-    if (ain > 0.3f)
+    if (ain > 0.5f)
     {
       dout = 1;
     }
@@ -21,8 +21,9 @@ int main()
     }
 
     // print the percentage and 16 bit normalized values
-    printf("percentage: %3.3f%%\n", ain.read() * 100.0f);
-    printf("normalized: 0x%04X \n", ain.read_u16());
-    wait(0.2f);
+    printf ("voltage: %3.9f\n", ain.read() * 3.3f);
+    // printf("percentage: %3.9f%%\n", ain.read() * 100.0f);
+    // printf("normalized: 0x%04X \n", ain.read_u16());
+    wait(0.1f);
   }
 }
