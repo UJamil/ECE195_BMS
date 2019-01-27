@@ -1,4 +1,9 @@
 #include <mbed.h>
+#include <TARGET_STM32F429xI/device/system_stm32f4xx.h>
+#include <TARGET_STM32F429xI/device/stm32f429xx.h>
+#include <stm32f439xx.h>
+#include <TARGET_STM32F429xI/TARGET_NUCLEO_F429ZI/PeripheralNames.h>
+#include <TARGET_STM32F429xI/TARGET_NUCLEO_F429ZI/PinNames.h>
 
 int main()
 {
