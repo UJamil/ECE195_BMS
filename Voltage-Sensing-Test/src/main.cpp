@@ -10,8 +10,13 @@ int main()
 
   // To be assigned
   // AnalogIn Battery1_VShunt(A3); 
-  // AnalogIn Battery1_VShunt(A3);
-  // AnalogIn Battery1_VShunt(A3);
+  // AnalogIn Battery2_VShunt(A4);
+  // AnalogIn Battery3_VShunt(A5);
+
+  // AnalogIn Battery1_Temp(A6);
+  // AnalogIn Battery2_Temp(A7);
+  // AnalogIn Battery3_Temp(A8);
+
 
   while (1)
   {
