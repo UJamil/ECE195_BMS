@@ -16,9 +16,11 @@
 // Function prototypes
 void setupADC(SPI);                     // Setup and initialize SPI communication for ADC
 void print_ADC_value(char *, int, int); // Console print hex values from ADC, for debugging
-float extract_float(char *);
+float extract_float(char *);            // Convert raw binary char values to floats
+
 // Declare SPI object globally
 SPI maximADC(PA_7, PA_6, PA_5, PA_4); // mosi, miso, sclk, ssel
+CAN can1(PD_0, PD_1);
 
 int main()
 {
@@ -27,6 +29,8 @@ int main()
   char conv_req = MESSAGE_INIT;
   char adc_response[RX_BUFFER_SIZE];
   float channel_value[NUM_CHANNELS];
+  char can_message[8];
+
 
   while (1)
   {
@@ -45,15 +49,34 @@ int main()
 
     for (int j = 0; j < NUM_CHANNELS; j += 3) // Voltage Format
     {
-      25.386f * channel_value[j] - 5.2756f;
+      channel_value[j] = 25.386f * channel_value[j] - 5.2756f;
     }
     for (int k = 1; k < NUM_CHANNELS; k += 3) // Current Format
     {
-      (channel_value[j] - 2.5039f) * 200;
+      channel_value[k] = (channel_value[k] - 2.5039f) * 200;
     }
     for (int l = 2; l < NUM_CHANNELS; l += 3) // Temperature Format
     {
-      channel_value[j]; // TODO: Change
+      channel_value[l] = channel_value[l]; // TODO: Change
+    }
+
+    int counter = 0;
+    for (int i = 1; i <= 3; i++)
+    {
+      for (int j = 1; j <= 3; j++)
+      {
+        snprintf(can_message, 8, "%d%d%3.1f", i, j, channel_value[counter]);
+        if (can1.write(CANMessage(12, can_message, 8)))
+        {
+          printf("%s\n", can_message);
+        }
+        counter++;
+        if (counter == 9)
+        {
+          counter = 0;
+        }
+        wait_ms(20);
+      }
     }
 
     maximADC.unlock();
@@ -75,6 +98,19 @@ void setupADC(SPI maximADC)
   maximADC.unlock();
 }
 
+void setupstorage(SPI maximADC)
+{
+  maximADC.lock();
+  maximADC.format(8, 0);       // 8-bit frame, pol = phase
+  maximADC.frequency(100000); // 1kHz clock frequency
+
+  maximADC.write(0x76); // select setup register, external timing (CNVST), internal reference off (external single ended 5V), unipolar setup
+  maximADC.write(0x00); // set all ADC channels to unipolar single-ended
+  maximADC.unlock();
+}
+
+
+// Print voltage values
 void print_ADC_value(char *adc_response, int size, int ch) // for debugging, print    hex values
 {
   printf("ch%d: ", ch);
@@ -84,6 +120,8 @@ void print_ADC_value(char *adc_response, int size, int ch) // for debugging, pri
   return;
 }
 
+
+// Helper Function
 float extract_float(char *input)
 {
   uint16_t adc_value = ((char)input[2] + ((char)input[1] << 8));
