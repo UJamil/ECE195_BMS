@@ -10,7 +10,6 @@
 
 // Libraries
 #include "mbed.h"
-#include "SDBlockDevice.h"
 
 // Definitions
 #define NUM_CHANNELS 9
@@ -25,13 +24,10 @@ float extract_float(char *); // Convert raw binary char values to floats
 
 // Global object declarations
 SPI maximADC(PA_7, PA_6, PA_5,
-             PA_4); // SPI1_MOSI, SPI1_MISO, SPI1_SCLK, SPI1_SSEL
-// SDBlockDevice sd(PA_7, PA_6, PA_5,
-//               PA_4);
-CAN can1(PD_0, PD_1); // CAN1_RD, CAN1_TD 
+             PA_4);   // SPI1_MOSI, SPI1_MISO, SPI1_SCLK, SPI1_SSEL
+CAN can1(PD_0, PD_1); // CAN1_RD, CAN1_TD
 
-int main()
-{
+int main() {
   setupADC(&maximADC);
 
   char conv_req = MESSAGE_INIT;
@@ -39,8 +35,7 @@ int main()
   float channel_value[NUM_CHANNELS];
   char can_message[8];
 
-  while (1)
-  {
+  while (1) {
     maximADC.lock();
     for (int i = 0; i < NUM_CHANNELS; i++) // Iterate through each ADC Channel
     {
@@ -68,18 +63,14 @@ int main()
     }
 
     int counter = 0;
-    for (int i = 1; i <= 3; i++)
-    {
-      for (int j = 1; j <= 3; j++)
-      {
+    for (int i = 1; i <= 3; i++) {
+      for (int j = 1; j <= 3; j++) {
         snprintf(can_message, 8, "%d%d%3.1f", i, j, channel_value[counter]);
-        if (can1.write(CANMessage(12, can_message, 8)))
-        {
+        if (can1.write(CANMessage(12, can_message, 8))) {
           printf("%s\n", can_message);
         }
         counter++;
-        if (counter == 9)
-        {
+        if (counter == 9) {
           counter = 0;
         }
         wait_ms(20);
@@ -92,8 +83,7 @@ int main()
   }
 }
 
-void setupADC(SPI * maximADC)
-{
+void setupADC(SPI * maximADC) {
   maximADC->lock();
   maximADC->format(8, 0);       // 8-bit frame, pol = phase
   maximADC->frequency(1000000); // 1MHz clock frequency, looks unstable if lower?
@@ -101,21 +91,20 @@ void setupADC(SPI * maximADC)
   // maximADC.write(0x00);        // Buffer
 
   maximADC->write(
-      0x76);            // select setup register, external timing (CNVST), internal
-                        // reference off (external single ended 5V), unipolar setup
+      0x76); // select setup register, external timing (CNVST), internal
+             // reference off (external single ended 5V), unipolar setup
   maximADC->write(0x00); // set all ADC channels to unipolar single-ended
   maximADC->unlock();
 }
 
-// void setupstorage(SPI * maximADC)
-// {
+// void setupstorage(SPI maximADC) {
 //   maximADC.lock();
 //   maximADC.format(8, 0);      // 8-bit frame, pol = phase
 //   maximADC.frequency(100000); // 1kHz clock frequency
 
 //   maximADC.write(
-//       0x76);            // select setup register, external timing (CNVST), internal
-//                         // reference off (external single ended 5V), unipolar setup
+//       0x76); // select setup register, external timing (CNVST), internal
+//              // reference off (external single ended 5V), unipolar setup
 //   maximADC.write(0x00); // set all ADC channels to unipolar single-ended
 //   maximADC.unlock();
 // }
@@ -132,8 +121,7 @@ void print_ADC_value(char *adc_response, int size,
 }
 
 // Helper Function
-float extract_float(char *input)
-{
+float extract_float(char *input) {
   uint16_t adc_value = ((char)input[2] + ((char)input[1] << 8));
   float adc_value_f = 1.2 * adc_value;
   return adc_value_f;
